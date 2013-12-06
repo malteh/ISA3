@@ -7,10 +7,7 @@
 %   expand              ;Berechnung der Kind-Zustandsbeschreibungen
 %   eval-path		;Bewertung eines Pfades
 
-
-
 start_description((0,0)).
-
 
 % Test, ob es sich um einen korrekten Startknoten handelt.
 % Trivial geloest: Es wird nur geprueft, ob die Aktion, die
@@ -18,21 +15,16 @@ start_description((0,0)).
 %
 start_node((start,_,_)).
 
-
-
 goal_node((_,(2,_),_)).
 
 goal_node((_,(_,2),_)).
-
-
 
 % state_member muss anwendungsspezifisch definiert werden, weil
 % die Zustandsbeschreibung beliebig komplex sein darf.
 %  
 state_member(State,StateList):-
   member(State,StateList).
-
-
+  
 expand((_,(L,S),_),Children):-
   fill_large((L,S),(L1,S1)),
   fill_small((L,S),(L2,S2)),

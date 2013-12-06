@@ -3,7 +3,6 @@ solve(Strategy):-
   start_description(StartState),
   solve((start,StartState,_),Strategy).
   
-  
 % Prädikat search: 
 %   1. Argument ist die Liste aller Pfade. Der aktuelle Pfad ist an erster Stelle. 
 %   Jeder Pfad ist als Liste von Zuständen repräsentiert, allerdings in falscher 
@@ -17,8 +16,6 @@ solve(StartNode,Strategy) :-
   reverse(Path,Path_in_correct_order),
   write_solution(Path_in_correct_order).
 
-
-
 write_solution(Path):-
   nl,write('SOLUTION:'),nl,
   write_actions(Path).  
@@ -28,10 +25,6 @@ write_actions([]).
 write_actions([(Action,_,_)|Rest]):-
   write('Action: '),write(Action),nl,
   write_actions(Rest).
-
-
-
-
 
 % Abbruchbedingung: Wenn ein Zielzustand erreicht ist, wird der aktuelle Pfad an den
 % dritten Parameter übertragen.

@@ -38,35 +38,42 @@ goal_description([
   handempty
   ]).
 
-
-
 start_node((start,_,_)).
 
 goal_node((_,State,_)):-
-  "Zielbedingungen einlesen"
-  "Zustand gegen Zielbedingungen testen".
-
-
+  % Zielbedingungen einlesen
+  goal_description(Goal),
+  % Zustand gegen Zielbedingungen testen.
+  mysubset(Goal, State).
 
 % Aufgrund der Komplexität der Zustandsbeschreibungen kann state_member nicht auf 
 % das Standardprädikat member zurückgeführt werden.
-%  
 state_member(_,[]):- !,fail.
 
 state_member(State,[FirstState|_]):-
-  "Test, ob State bereits durch FirstState beschrieben war. Tipp: Eine 
-  Lösungsmöglichkeit besteht in der Verwendung einer Mengenoperation, z.B. subtract"  ,!.  
+  % Test, ob State bereits durch FirstState beschrieben war. Tipp: Eine 
+  % Lösungsmöglichkeit besteht in der Verwendung einer Mengenoperation, z.B. subtract
+  subtract(State, FirstState, []),
+  subtract(FirstState, State, []),!.  
 
-%Es ist sichergestellt, dass die beiden ersten Klauseln nicht zutreffen.
+% Es ist sichergestellt, dass die beiden ersten Klauseln nicht zutreffen.
 state_member(State,[_|RestStates]):-  
-  "rekursiver Aufruf".
-
+  % rekursiver Aufruf.
+  state_member(State, RestStates).
 
 eval_path([(_,State,Value)|RestPath]):-
-  eval_state(State,"Rest des Literals bzw. der Klausel"
-  "Value berechnen".
-
+  length(RestPath,L_RestPath),
+  eval_state((_, State, Value_S)),
+  % ,"Rest des Literals bzw. der Klausel"
+  % "Value berechnen".
+  Value is L_RestPath + Value_S.
   
+eval_path([Node|_]):-
+  eval_state(Node).
+
+% anpassen!!!
+eval_state((_,_State,Value)):-
+  Value is 1.
 
 action(pick_up(X),
        [handempty, clear(X), on(table,X)],
@@ -88,7 +95,6 @@ action(put_on(Y,X),
        [holding(X), clear(Y)],
        [handempty, clear(X), on(Y,X)]).
 
-
 % Hilfskonstrukt, weil das PROLOG "subset" nicht die Unifikation von Listenelementen 
 % durchführt, wenn Variablen enthalten sind. "member" unifiziert hingegen.
 %
@@ -97,38 +103,15 @@ mysubset([H|T],List):-
   member(H,List),
   mysubset(T,List).
 
-
 expand_help(State,Name,NewState):-
-  "Action suchen"
-  "Conditions testen"
-  "Del-List umsetzen"
-  "Add-List umsetzen".
+  % "Action suchen"
+  action(Name, Conditions, Del, Add),
+  % "Conditions testen"
+  mysubset(Conditions, State),
+  % "Del-List umsetzen"
+  subtract(State, Del, Diff),
+  % "Add-List umsetzen"
+  append(Diff, Add, NewState).
   
 expand((_,State,_),Result):-
   findall((Name,NewState,_),expand_help(State,Name,NewState),Result).
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
