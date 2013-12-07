@@ -7,7 +7,6 @@
 %   expand              ;Berechnung der Kind-Zustandsbeschreibungen
 %   eval-path		;Bewertung eines Pfades
 
-
 start_description([
   block(block1),
   block(block2),
@@ -41,39 +40,61 @@ goal_description([
 start_node((start,_,_)).
 
 goal_node((_,State,_)):-
-  % Zielbedingungen einlesen
-  goal_description(Goal),
-  % Zustand gegen Zielbedingungen testen.
-  mysubset(Goal, State).
+  goal_description(Goal), % Zielbedingungen einlesen
+  mysubset(Goal, State). % Zustand gegen Zielbedingungen testen.
 
 % Aufgrund der Komplexität der Zustandsbeschreibungen kann state_member nicht auf 
 % das Standardprädikat member zurückgeführt werden.
 state_member(_,[]):- !,fail.
 
 state_member(State,[FirstState|_]):-
-  % Test, ob State bereits durch FirstState beschrieben war. Tipp: Eine 
-  % Lösungsmöglichkeit besteht in der Verwendung einer Mengenoperation, z.B. subtract
-  subtract(State, FirstState, []),
-  subtract(FirstState, State, []),!.  
+  % Test, ob State bereits durch FirstState beschrieben war. Tipp: Eine Lösungsmöglichkeit besteht in der Verwendung einer Mengenoperation, z.B. subtract
+  subtract(State, FirstState, []), subtract(FirstState, State, []),!.  
 
 % Es ist sichergestellt, dass die beiden ersten Klauseln nicht zutreffen.
 state_member(State,[_|RestStates]):-  
-  % rekursiver Aufruf.
-  state_member(State, RestStates).
+  state_member(State, RestStates). % rekursiver Aufruf.
 
-eval_path([(_,State,Value)|RestPath]):-
+eval_path([(_,State,Value)|RestPath],Heuristik):-
   length(RestPath,L_RestPath),
-  eval_state((_, State, Value_S)),
+  eval_state((_, State, Value_S),Heuristik),
   % ,"Rest des Literals bzw. der Klausel"
   % "Value berechnen".
   Value is L_RestPath + Value_S.
   
-eval_path([Node|_]):-
-  eval_state(Node).
+eval_path([Node|_], Heuristik):-
+  eval_state(Node, Heuristik).
 
-% anpassen!!!
-eval_state((_,_State,Value)):-
+% Sehr einfache Heuristik
+eval_state((_,_State,Value), simple):-
   Value is 1.
+
+% Gute Heuristik
+eval_state((_,State,Value), good):-
+  goal_description(Goal),
+  length(Goal,L_Goal),
+  intersection(State,Goal,InGoalAndState),
+  length(InGoalAndState,L_InGoalAndState),
+  Value is L_Goal - L_InGoalAndState.
+
+% Bessere Heuristik
+eval_state((_,State,Value), better):-
+  goal_description(Goal),
+  length(Goal,L_Goal),
+  intersection(State,Goal,InGoalAndState),
+  length(InGoalAndState,L_InGoalAndState),
+  % on(X,Y) is aufwaendiger, als z.B. clear(X) und zäht deshalb doppelt
+  subtract(Goal,State,RestGoal),
+  on_counter(RestGoal,OnCount),
+  Value is L_Goal - L_InGoalAndState + OnCount.
+
+on_counter([],0).
+on_counter([on(_,_)|T],Count):-
+  on_counter(T,Count_rec),
+  Count is Count_rec + 1,!.
+on_counter([_|T],Count):-
+  on_counter(T,Count_rec),
+  Count is Count_rec.
 
 action(pick_up(X),
        [handempty, clear(X), on(table,X)],

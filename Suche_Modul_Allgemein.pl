@@ -1,8 +1,8 @@
 % Das Programm wird mit solve(depth), solve(breadth) oder solve(informed) aufgerufen.
-solve(Strategy):-
+solve(Strategy, Heuristik):-
   start_description(StartState),
-  solve((start,StartState,_),Strategy).
-  
+  solve((start,StartState,_),Strategy,Heuristik).
+
 % Prädikat search: 
 %   1. Argument ist die Liste aller Pfade. Der aktuelle Pfad ist an erster Stelle. 
 %   Jeder Pfad ist als Liste von Zuständen repräsentiert, allerdings in falscher 
@@ -10,9 +10,9 @@ solve(Strategy):-
 %   2. Argument ist die Strategie
 %   3. Argument ist der Ergebnis-Pfad.
 %
-solve(StartNode,Strategy) :-
+solve(StartNode,Strategy,Heuristik) :-
   start_node(StartNode),
-  search([[StartNode]],Strategy,Path),
+  search([[StartNode]],Strategy,Heuristik,Path),
   reverse(Path,Path_in_correct_order),
   write_solution(Path_in_correct_order).
 
@@ -29,48 +29,23 @@ write_actions([(Action,_,_)|Rest]):-
 % Abbruchbedingung: Wenn ein Zielzustand erreicht ist, wird der aktuelle Pfad an den
 % dritten Parameter übertragen.
 %
-search([[FirstNode|Predecessors]|_],_,[FirstNode|Predecessors]) :- 
+search([[FirstNode|Predecessors]|_],_,_,[FirstNode|Predecessors]) :- 
   goal_node(FirstNode),
   nl,write('SUCCESS'),nl,!.
 
-
-search([[FirstNode|Predecessors]|RestPaths],Strategy,Solution) :- 
+search([[FirstNode|Predecessors]|RestPaths],Strategy,Heuristik,Solution) :- 
   expand(FirstNode,Children),                                    % Nachfolge-Zustände berechnen
   generate_new_paths(Children,[FirstNode|Predecessors],NewPaths), % Nachfolge-Zustände einbauen 
-  insert_new_paths(Strategy,NewPaths,RestPaths,AllPaths),        % Neue Pfade einsortieren
-  search(AllPaths,Strategy,Solution).
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  insert_new_paths(Strategy,Heuristik,NewPaths,RestPaths,AllPaths),        % Neue Pfade einsortieren
+  search(AllPaths,Strategy,Heuristik,Solution).
 
 generate_new_paths(Children,Path,NewPaths):-
   maplist(get_state,Path,States),
   generate_new_paths_help(Children,Path,States,NewPaths).
 
-
-
 % Abbruchbedingung, wenn alle Kindzustände abgearbeitet sind.
 %
 generate_new_paths_help([],_,_,[]).
-
 
 % Falls der Kindzustand bereits im Pfad vorhanden war, wird der gesamte Pfad verworfen,
 % denn er würde nur in einem Zyklus enden. (Dies betrifft nicht die Fortsetzung des 
@@ -81,17 +56,13 @@ generate_new_paths_help([FirstChild|RestChildren],Path,States,RestNewPaths):-
   get_state(FirstChild,State),state_member(State,States),!,
   generate_new_paths_help(RestChildren,Path,States,RestNewPaths).
 
-
 % Ansonsten, also falls der Kindzustand noch nicht im Pfad vorhanden war, wird er als 
 % Nachfolge-Zustand eingebaut.
 %
 generate_new_paths_help([FirstChild|RestChildren],Path,States,[[FirstChild|Path]|RestNewPaths]):- 
   generate_new_paths_help(RestChildren,Path,States,RestNewPaths).
 
- 
 get_state((_,State,_),State).
-
-
 
 %%% Strategie:
 
@@ -125,8 +96,8 @@ insert_new_paths(breadth,NewPaths,OldPaths,AllPaths):-
   write_action(AllPaths).
 
 % Informierte Suche
-insert_new_paths(informed,NewPaths,OldPaths,AllPaths):-
-  eval_paths(NewPaths),
+insert_new_paths(informed,Heuristik,NewPaths,OldPaths,AllPaths):-
+  eval_paths(NewPaths,Heuristik),
   insert_new_paths_informed(NewPaths,OldPaths,AllPaths),
   write_action(AllPaths),
   write_state(AllPaths).
