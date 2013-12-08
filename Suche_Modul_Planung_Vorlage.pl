@@ -55,6 +55,13 @@ state_member(State,[FirstState|_]):-
 state_member(State,[_|RestStates]):-  
   state_member(State, RestStates). % rekursiver Aufruf.
 
+eval_path([(_,State,Value)|RestPath],a):-
+  length(RestPath,L_RestPath),
+  eval_state((_, State, Value_S),better),
+  % ,"Rest des Literals bzw. der Klausel"
+  % "Value berechnen".
+  Value is L_RestPath + Value_S.
+
 eval_path([(_,State,Value)|RestPath],Heuristik):-
   length(RestPath,L_RestPath),
   eval_state((_, State, Value_S),Heuristik),
@@ -67,7 +74,7 @@ eval_path([Node|_], Heuristik):-
 
 % Sehr einfache Heuristik
 eval_state((_,_State,Value), simple):-
-  Value is 1.
+  Value is 0.
 
 % Gute Heuristik
 eval_state((_,State,Value), good):-

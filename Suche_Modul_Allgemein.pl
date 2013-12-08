@@ -102,8 +102,15 @@ insert_new_paths(informed,Heuristik,NewPaths,OldPaths,AllPaths):-
   write_action(AllPaths),
   write_state(AllPaths).
 
+% A*
+insert_new_paths(a,_Heuristik,NewPaths,OldPaths,AllPaths):-
+  eval_paths(NewPaths,a),
+  insert_new_paths_informed(NewPaths,OldPaths,AllPaths),
+  write_action(AllPaths),
+  write_state(AllPaths).
 
+% gierige Bestensuche
 
+% optimistisches Bergsteigen
 
-
-
+% Bergsteigen mit Backtracking
