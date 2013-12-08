@@ -118,7 +118,7 @@ insert_new_paths(greedy,_Heuristik,NewPaths,OldPaths,AllPaths):-
   write_state(AllPaths).
 
 % optimistisches Bergsteigen
-insert_new_paths(optimistic,_Heuristik,NewPaths,_OldPaths,Path):-
+insert_new_paths(hc_optimistic,_Heuristik,NewPaths,_OldPaths,Path):-
   eval_paths(NewPaths,good),
   min_list(NewPaths, Node),
   Path = [Node],
@@ -126,3 +126,9 @@ insert_new_paths(optimistic,_Heuristik,NewPaths,_OldPaths,Path):-
   write_state(Path).
 
 % Bergsteigen mit Backtracking
+insert_new_paths(hc_backtracking,_Heuristik,NewPaths,OldPaths,AllPaths):-
+  eval_paths(NewPaths,good),
+  insert_new_paths_informed(NewPaths,[],SortedPaths),
+  append(SortedPaths,OldPaths,AllPaths),
+  write_action(AllPaths),
+  write_state(AllPaths).
