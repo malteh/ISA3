@@ -81,16 +81,16 @@ write_fail(depth,[[(_,State)|_]|_]):-
 write_fail(_,_):-  nl,write('FAIL').
 
 % Alle Strategien: Keine neuen Pfade vorhanden
-insert_new_paths(Strategy,[],OldPaths,OldPaths):-
+insert_new_paths(Strategy,_,[],OldPaths,OldPaths):-
   write_fail(Strategy,OldPaths),!.
 
 % Tiefensuche
-insert_new_paths(depth,NewPaths,OldPaths,AllPaths):-
+insert_new_paths(depth,_,NewPaths,OldPaths,AllPaths):-
   append(NewPaths,OldPaths,AllPaths),
   write_action(NewPaths).
 
 % Breitensuche
-insert_new_paths(breadth,NewPaths,OldPaths,AllPaths):-
+insert_new_paths(breadth,_,NewPaths,OldPaths,AllPaths):-
   append(OldPaths,NewPaths,AllPaths),
   write_next_state(AllPaths),
   write_action(AllPaths).
