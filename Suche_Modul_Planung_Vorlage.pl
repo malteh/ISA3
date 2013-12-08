@@ -62,13 +62,6 @@ eval_path([(_,State,Value)|RestPath],a):-
   % "Value berechnen".
   Value is L_RestPath + Value_S.
 
-eval_path([(_,State,Value)|RestPath],Heuristik):-
-  length(RestPath,L_RestPath),
-  eval_state((_, State, Value_S),Heuristik),
-  % ,"Rest des Literals bzw. der Klausel"
-  % "Value berechnen".
-  Value is L_RestPath + Value_S.
-  
 eval_path([Node|_], Heuristik):-
   eval_state(Node, Heuristik).
 

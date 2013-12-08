@@ -25,5 +25,18 @@ insert_path_informed(NewPath,[FirstPath|RestPaths],[NewPath,FirstPath|RestPaths]
 insert_path_informed(NewPath,[FirstPath|RestPaths],[FirstPath|NewRestPaths]):-
   insert_path_informed(NewPath,RestPaths,NewRestPaths).  
 
+min_list([Return], Return).
+
+min_list([FirstNode|RestNodes], MinRest):-
+  min_list(RestNodes, MinRest),
+  min(FirstNode, MinRest, MinRest).
+
+min(Node1, Node2, Return):-
+  ((_,_,Value1) = Node1,
+  (_,_,Value2) = Node2,
+  Value1 < Value2,
+  Return = Node1),!;
+  Return = Node2.
+  
 cheaper([(_,_,V1)|_],[(_,_,V2)|_]):-
   V1 =< V2.
